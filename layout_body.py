@@ -176,100 +176,77 @@ draw_area = draw.Group(
     transform='translate(' + str(draw_area_margin_dim['left']) + ',' + str(draw_area_margin_dim['top']) + ')'
 )
 
-# Initialise x, y
+# Initialise pointers used to position SVG components
 x = 0
 y = 0
 
 # Create sections
-if section_head_position == 'left':
+for i, row in df_subtotal.iterrows():
 
-    for i, row in df_subtotal.iterrows():
+    # Reset x
+    x = 0
 
-        # Reset x
-        x = 0
-
-        # Calculate section dimensions
-        section_head_dim = {
+    # Calculate section dimensions
+    # NB: By calculating left_section_head_dim, top_section_head_dim for both
+    # section_head_position options, this simplifies the logic that comes after
+    if section_head_position == 'left':
+        left_section_head_dim = {
             'width': section_head_width,
             'height': row['rows'] * element_height
         }
-        section_body_dim = {
-            'width': draw_area_dim['width'] - section_head_width,
-            'height': row['rows'] * element_height
+        top_section_head_dim = {
+            'width': 0,
+            'height': 0
         }
-
-        # Draw section head
-        draw_area.append(
-            draw.Rectangle(
-                x=x, y=y,
-                width=section_head_dim['width'], height=section_head_dim['height'],
-                fill='lightgrey', stroke_width=0
-            )
-        )
-
-        x += section_head_dim['width']
-
-        # Draw section body
-        draw_area.append(
-            draw.Rectangle(
-                x=x, y=y,
-                width=section_body_dim['width'], height=section_body_dim['height'],
-                fill=f"#{random.randint(0, 0xFFFFFF):06x}", stroke_width=0
-            )
-        )
-
-        y += section_body_dim['height']
-
-        # Draw elements
-        # Calculate element dimensions
-        # TODO
-        # element_dim = {
-        #     'width': section_body_dim['width'] / elements_per_row,
-        #     'height': element_height
-        # }
-
-elif section_head_position == 'top':
-    for i, row in df_subtotal.iterrows():
-
-        # Calculate section dimensions
-        section_head_dim = {
+    elif section_head_position == 'top':
+        left_section_head_dim = {
+            'width': 0,
+            'height': 0
+        }
+        top_section_head_dim = {
             'width': draw_area_dim['width'],
             'height': section_head_height
         }
-        section_body_dim = {
-            'width': draw_area_dim['width'],
-            'height': row['rows'] * element_height
-        }
 
-        # Draw section head
-        draw_area.append(
-            draw.Rectangle(
-                x=x, y=y,
-                width=section_head_dim['width'], height=section_head_dim['height'],
-                fill='lightgrey', stroke_width=0
-            )
+    section_head_dim = {
+        'width': left_section_head_dim['width'] + top_section_head_dim['width'],
+        'height': left_section_head_dim['height'] + top_section_head_dim['height']
+    }
+    section_body_dim = {
+        'width': draw_area_dim['width'] - left_section_head_dim['width'],
+        'height': row['rows'] * element_height
+    }
+
+    # Draw section head
+    draw_area.append(
+        draw.Rectangle(
+            x=x, y=y,
+            width=section_head_dim['width'], height=section_head_dim['height'],
+            fill='lightgrey', stroke_width=0
         )
+    )
 
-        y += section_head_dim['height']
+    x += left_section_head_dim['width']
+    y += top_section_head_dim['height']
 
-        # Draw section body
-        draw_area.append(
-            draw.Rectangle(
-                x=x, y=y,
-                width=section_body_dim['width'], height=section_body_dim['height'],
-                fill=f"#{random.randint(0, 0xFFFFFF):06x}", stroke_width=0
-            )
+    # Draw section body
+    draw_area.append(
+        draw.Rectangle(
+            x=x, y=y,
+            width=section_body_dim['width'], height=section_body_dim['height'],
+            fill=f"#{random.randint(0, 0xFFFFFF):06x}", stroke_width=0
         )
+    )
 
-        y += section_body_dim['height']
+    y += section_body_dim['height']
 
-        # # Draw elements
-        # # Calculate element dimensions
-        # TODO
-        # element_dim = {
-        #     'width': section_body_dim['width'] / elements_per_row,
-        #     'height': element_height
-        # }
+    # Draw elements
+    # Calculate element dimensions
+    # TODO
+    # element_dim = {
+    #     'width': section_body_dim['width'] / elements_per_row,
+    #     'height': element_height
+    # }
 
 # Add draw_area to body
 body.append(draw_area)
