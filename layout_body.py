@@ -32,21 +32,22 @@ import cairosvg     # noqa: E402, F401
 
 # %%
 # SET PARAMETERS
-body_dim = {'width': 1000, 'height': 500}
-margin_dim = {'top': 10, 'right': 10, 'bottom': 10, 'left': 10}
+body_width = 800
+draw_area_margin_dim = {'top': 10, 'right': 10, 'bottom': 10, 'left': 10}
 
 font = 'Open Sans'
 
 # Positioning
-# section_head_position = 'top'
-section_head_key_dim = 100      # XXX
-
 section_head_position = 'left'
+section_head_width = 100
+section_head_height = None
 
-section_row_height = 50
-
+# section_head_position = 'top'
+# section_head_width = None
+# section_head_height = 100
 
 elements_per_row = 5
+element_height = 50
 element_margin_dim = {'top': 2, 'right': 2, 'bottom': 2, 'left': 2}
 
 # %%
@@ -110,6 +111,12 @@ df_subtotal = df.groupby(
     ascending=False,
 ).reset_index(drop=True)
 
+# Calculate maximum number of rows that will be needed per party
+# NB: This is an implementation of ceiling division
+# NB: Note that this may not be the number of rows we use in the final graphic - where
+# we use horizontal spacing between parties we may end up collapsing some rows
+df_subtotal['rows'] = df_subtotal['MPs'].apply(lambda x: -(-x // elements_per_row))
+
 # Make party names column categorical and set order
 df['Party'] = pd.Categorical(
     df['Party'],
@@ -128,9 +135,24 @@ df_sorted = df.reset_index().sort_values(
 ).reset_index(drop=True)
 
 # %%
+# CALCULATE DRAW AREA, BODY DIMENSIONS
+if section_head_position == 'left':
+    draw_area_dim = {
+        'width': body_width - draw_area_margin_dim['left'] - draw_area_margin_dim['right'],
+        'height': df_subtotal['rows'].sum() * element_height
+    }
+elif section_head_position == 'top':
+    draw_area_dim = {
+        'width': body_width - draw_area_margin_dim['left'] - draw_area_margin_dim['right'],
+        'height': df_subtotal['rows'].sum() * element_height + len(df_subtotal) * section_head_height
+    }
+
+body_height = draw_area_dim['height'] + draw_area_margin_dim['top'] + draw_area_margin_dim['bottom']
+
+# %%
 # CREATE GRAPHIC
 # Create body
-body = draw.Drawing(body_dim['width'], body_dim['height'])
+body = draw.Drawing(body_width, body_height)
 
 # Add font
 body.embed_google_font(font)
@@ -139,7 +161,7 @@ body.embed_google_font(font)
 body.append(
     draw.Rectangle(
         x=0, y=0,
-        width=body_dim['width'], height=body_dim['height'],
+        width=body_width, height=body_height,
         fill='white'
     )
 )
@@ -149,50 +171,107 @@ body.append(
 # the draw_area as the origin. Elements are not constrained to the dimensions of
 # the draw_area though - this still needs to be managed as part of drawing elements
 # Ref: https://gist.github.com/mbostock/3019563
-draw_area_dim = {
-    'width': body_dim['width'] - margin_dim['left'] - margin_dim['right'],
-    'height': body_dim['height'] - margin_dim['top'] - margin_dim['bottom']
-}
-
 draw_area = draw.Group(
-    transform='translate(' + str(margin_dim['left']) + ',' + str(margin_dim['top']) + ')'
+    transform='translate(' + str(draw_area_margin_dim['left']) + ',' + str(draw_area_margin_dim['top']) + ')'
 )
 
+# Initialise x, y
+x = 0
+y = 0
+
 # Create sections
-section_dim = {
-    'width': draw_area_dim['width'],
-    'height': draw_area_dim['height'] / sections
-}
-
 if section_head_position == 'left':
-    pass
 
-# Draw elements
-element_dim = {
-    'width': (draw_area_dim['width'] - (elements_per_row - 1) * element_margin_dim['left'] - element_margin_dim['right']) / elements_per_row,
-    'height': (draw_area_dim['height'] - (number_of_elements / elements_per_row - 1) * element_margin_dim['top'] - element_margin_dim['bottom']) / (number_of_elements / elements_per_row)
-}
-for i in range(number_of_elements):
-    row = i // elements_per_row
-    col = i % elements_per_row
-    x = col * (element_dim['width'] + element_margin_dim['left'])
-    y = row * (element_dim['height'] + element_margin_dim['top'])
-    draw_area.append(
-        draw.Rectangle(
-            x=x, y=y,
-            width=element_dim['width'], height=element_dim['height'],
-            fill='orange', stroke_width=0, stroke='blue'
+    for i, row in df_subtotal.iterrows():
+
+        # Reset x
+        x = 0
+
+        # Calculate section dimensions
+        section_head_dim = {
+            'width': section_head_width,
+            'height': row['rows'] * element_height
+        }
+        section_body_dim = {
+            'width': draw_area_dim['width'] - section_head_width,
+            'height': row['rows'] * element_height
+        }
+
+        # Draw section head
+        draw_area.append(
+            draw.Rectangle(
+                x=x, y=y,
+                width=section_head_dim['width'], height=section_head_dim['height'],
+                fill='lightgrey', stroke_width=0
+            )
         )
-    )
+
+        x += section_head_dim['width']
+
+        # Draw section body
+        draw_area.append(
+            draw.Rectangle(
+                x=x, y=y,
+                width=section_body_dim['width'], height=section_body_dim['height'],
+                fill='yellow', stroke_width=0
+            )
+        )
+
+        y += section_body_dim['height']
+
+        # Draw elements
+        # Calculate element dimensions
+        # TODO
+        # element_dim = {
+        #     'width': section_body_dim['width'] / elements_per_row,
+        #     'height': element_height
+        # }
+
+elif section_head_position == 'top':
+    for i, row in df_subtotal.iterrows():
+
+        # Calculate section dimensions
+        section_head_dim = {
+            'width': draw_area_dim['width'],
+            'height': section_head_height
+        }
+        section_body_dim = {
+            'width': draw_area_dim['width'],
+            'height': row['rows'] * element_height
+        }
+
+        # Draw section head
+        draw_area.append(
+            draw.Rectangle(
+                x=x, y=y,
+                width=section_head_dim['width'], height=section_head_dim['height'],
+                fill='lightgrey', stroke_width=0
+            )
+        )
+
+        y += section_head_dim['height']
+
+        # Draw section body
+        draw_area.append(
+            draw.Rectangle(
+                x=x, y=y,
+                width=section_body_dim['width'], height=section_body_dim['height'],
+                fill='yellow', stroke_width=0
+            )
+        )
+
+        y += section_body_dim['height']
+
+        # # Draw elements
+        # # Calculate element dimensions
+        # TODO
+        # element_dim = {
+        #     'width': section_body_dim['width'] / elements_per_row,
+        #     'height': element_height
+        # }
 
 # Add draw_area to body
 body.append(draw_area)
 
-# %%
 # Display body
 display(body)
-
-# %%
-body.save_svg('MPs standing down graphic inner.svg')
-
-# %%
