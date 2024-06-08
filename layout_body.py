@@ -4,7 +4,7 @@
 
 """
     Purpose
-        XXX
+        Layout graphic body
     Inputs
         XXX
     Outputs
@@ -14,8 +14,6 @@
     Notes
         XXX
 """
-
-# flake8: noqa
 
 import os
 import random
@@ -145,7 +143,9 @@ if section_head_position == 'left':
 elif section_head_position == 'top':
     draw_area_dim = {
         'width': body_width - draw_area_margin_dim['left'] - draw_area_margin_dim['right'],
-        'height': df_subtotal['rows'].sum() * element_height + len(df_subtotal) * section_head_height
+        'height': (
+            df_subtotal['rows'].sum() * element_height + len(df_subtotal) * section_head_height
+        )
     }
 
 body_height = draw_area_dim['height'] + draw_area_margin_dim['top'] + draw_area_margin_dim['bottom']
@@ -173,7 +173,12 @@ body.append(
 # the draw_area though - this still needs to be managed as part of drawing elements
 # Ref: https://gist.github.com/mbostock/3019563
 draw_area = draw.Group(
-    transform='translate(' + str(draw_area_margin_dim['left']) + ',' + str(draw_area_margin_dim['top']) + ')'
+    transform=(
+        'translate(' +
+        str(draw_area_margin_dim['left']) + ',' +
+        str(draw_area_margin_dim['top']) +
+        ')'
+    )
 )
 
 # Initialise pointers used to position SVG components
