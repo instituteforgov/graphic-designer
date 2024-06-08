@@ -20,7 +20,7 @@ import os
 from IPython.display import display
 import pandas as pd
 
-from layout_body import lay_out_body
+from lay_out_body import lay_out_body
 
 # %%
 # SET PARAMETERS
