@@ -31,12 +31,17 @@ font = 'Open Sans'
 
 # Positioning
 section_head_position = 'left'
-section_head_width = 100
+section_head_width = 200
 section_head_height = None
 
 # section_head_position = 'top'
 # section_head_width = None
 # section_head_height = 100
+
+section_head_vertical_text_align = 'top'
+section_head_text_size = 20
+section_head_text_color = 'black'
+section_head_padding_dim = {'top': 5, 'right': 5, 'bottom': 5, 'left': 5}
 
 elements_per_row = 5
 element_height = 50
@@ -96,6 +101,7 @@ df_subtotal = df.groupby(
     'Name': 'count'
 }).rename(
     columns={
+        'Party': 'section',
         'Name': 'MPs'
     }
 ).sort_values(
@@ -112,7 +118,7 @@ df_subtotal['rows'] = df_subtotal['MPs'].apply(lambda x: -(-x // elements_per_ro
 # Make party names column categorical and set order
 df['Party'] = pd.Categorical(
     df['Party'],
-    categories=df_subtotal['Party'],
+    categories=df_subtotal['section'],
     ordered=True,
 )
 
@@ -137,6 +143,10 @@ graphic = lay_out_body(
     section_head_position,
     section_head_width,
     section_head_height,
+    section_head_vertical_text_align,
+    section_head_text_size,
+    section_head_text_color,
+    section_head_padding_dim,
     elements_per_row,
     element_height,
     element_margin_dim,

@@ -38,6 +38,10 @@ def lay_out_body(
     section_head_position: Union[Literal['left'], Literal['top']] = 'top',
     section_head_width: int = 100,
     section_head_height: int = None,
+    section_head_vertical_text_align: Literal['top', 'center', 'bottom'] = 'top',
+    section_head_text_size: int = 20,
+    section_head_text_color: str = 'black',
+    section_head_padding_dim: dict = {'top': 5, 'right': 5, 'bottom': 5, 'left': 5},
     elements_per_row: int = 5,
     element_height: int = 50,
     element_margin_dim: dict = {'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
@@ -58,6 +62,9 @@ def lay_out_body(
         is 'left'. This is ignored when section_head_position is 'top'
         - section_head_height: Height of section heads when section_head_position
         is 'top'. This is ignored when section_head_position is 'left'
+        - section_head_vertical_text_align: Vertical alignment of text in section heads
+        - section_head_text_size: Font size of text in section heads
+        - section_head_text_color: Color of text in section heads
         - elements_per_row: Number of elements to be displayed in each row
         - element_height: Height of each element
         - element_margin_dim: Margin dimensions for each element
@@ -163,6 +170,31 @@ def lay_out_body(
                 x=x, y=y,
                 width=section_head_dim['width'], height=section_head_dim['height'],
                 fill='lightgrey', stroke_width=0
+            )
+        )
+
+        # Calculate text position
+        if section_head_vertical_text_align == 'top':
+            text_x = x + section_head_padding_dim['left']
+            text_y = y + section_head_padding_dim['top'] + section_head_text_size
+        elif section_head_vertical_text_align == 'center':
+            text_x = x + section_head_padding_dim['left']
+            text_y = (
+                y + section_head_padding_dim['top'] +
+                (section_head_dim['height'] + section_head_text_size) / 2 -
+                section_head_padding_dim['bottom']
+            )
+        elif section_head_vertical_text_align == 'bottom':
+            text_x = x + section_head_padding_dim['left']
+            text_y = y + section_head_dim['height'] - section_head_padding_dim['bottom']
+
+        # Draw section head text
+        draw_area.append(
+            draw.Text(
+                row['section'],
+                x=text_x, y=text_y,
+                font_size=section_head_text_size, font_family=font, fill=section_head_text_color,
+                text_anchor='start'
             )
         )
 
