@@ -18,6 +18,7 @@
 # flake8: noqa
 
 import os
+import random
 
 import drawsvg as draw
 from IPython.display import display
@@ -213,7 +214,7 @@ if section_head_position == 'left':
             draw.Rectangle(
                 x=x, y=y,
                 width=section_body_dim['width'], height=section_body_dim['height'],
-                fill='yellow', stroke_width=0
+                fill=f"#{random.randint(0, 0xFFFFFF):06x}", stroke_width=0
             )
         )
 
@@ -256,7 +257,7 @@ elif section_head_position == 'top':
             draw.Rectangle(
                 x=x, y=y,
                 width=section_body_dim['width'], height=section_body_dim['height'],
-                fill='yellow', stroke_width=0
+                fill=f"#{random.randint(0, 0xFFFFFF):06x}", stroke_width=0
             )
         )
 
