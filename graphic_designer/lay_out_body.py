@@ -40,7 +40,7 @@ def lay_out_body(
     section_head_height: int = None,
     section_head_vertical_text_align: Literal['top', 'center', 'bottom'] = 'top',
     section_head_text_size: int = 20,
-    section_head_text_color: str = 'black',
+    section_head_text_color: Union[str, dict] = 'black',
     section_head_padding_dim: dict = {'top': 5, 'right': 5, 'bottom': 5, 'left': 5},
     elements_per_row: int = 5,
     element_height: int = 50,
@@ -64,7 +64,9 @@ def lay_out_body(
         is 'top'. This is ignored when section_head_position is 'left'
         - section_head_vertical_text_align: Vertical alignment of text in section heads
         - section_head_text_size: Font size of text in section heads
-        - section_head_text_color: Color of text in section heads
+        - section_head_text_color: Color of text in section heads. If a string, this
+        color is applied to all section heads. If a dictionary, each key should be a
+        section name and the corresponding value should be the color for that section
         - section_head_padding_dim: Padding dimensions for section heads
         - elements_per_row: Number of elements to be displayed in each row
         - element_height: Height of each element
@@ -190,11 +192,19 @@ def lay_out_body(
             text_y = y + section_head_dim['height'] - section_head_padding_dim['bottom']
 
         # Draw section head text
+        if isinstance(section_head_text_color, dict):
+            if row['section'] in section_head_text_color:
+                text_color = section_head_text_color[row['section']]
+            else:
+                text_color = 'black'
+        else:
+            text_color = section_head_text_color
+
         draw_area.append(
             draw.Text(
                 row['section'],
                 x=text_x, y=text_y,
-                font_size=section_head_text_size, font_family=font, fill=section_head_text_color,
+                font_size=section_head_text_size, font_family=font, fill=text_color,
                 text_anchor='start'
             )
         )

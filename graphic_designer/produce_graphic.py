@@ -10,6 +10,8 @@
     Outputs
         None
     Parameters
+        - ifg_dark_grey: Colour used for text
+        - dict_party_colours: Party colours
         - See lay_out_body()
     Notes
         None
@@ -24,28 +26,23 @@ from lay_out_body import lay_out_body
 
 # %%
 # SET PARAMETERS
-body_width = 800
-draw_area_margin_dim = {'top': 10, 'right': 10, 'bottom': 10, 'left': 10}
+# Colours
+ifg_dark_grey = '#333f48'
 
-font = 'Open Sans'
-
-# Positioning
-section_head_position = 'left'
-section_head_width = 200
-section_head_height = None
-
-# section_head_position = 'top'
-# section_head_width = None
-# section_head_height = 100
-
-section_head_vertical_text_align = 'top'
-section_head_text_size = 20
-section_head_text_color = 'black'
-section_head_padding_dim = {'top': 5, 'right': 5, 'bottom': 5, 'left': 5}
+dict_party_colours = {
+    'Conservative': '#00539f',
+    'Labour': '#ee3224',
+    'Liberal Democrat': '#ffb703',
+    'Scottish National Party': '#fff95d',
+    'PC': '#3f8429',
+    'Green': '#6ab023',
+    'Reform UK': '#3bb7ce',
+    'Democratic Unionist Party': '#8f1d20',
+    'Sinn Féin': '#006837',
+    'Independent': '#c1c5c8',
+}
 
 elements_per_row = 5
-element_height = 50
-element_margin_dim = {'top': 2, 'right': 2, 'bottom': 2, 'left': 2}
 
 # %%
 # READ IN DATA AND CREATE SUBTOTALS
@@ -137,19 +134,22 @@ df_sorted = df.reset_index().sort_values(
 graphic = lay_out_body(
     df_sorted,
     df_subtotal,
-    body_width,
-    draw_area_margin_dim,
-    font,
-    section_head_position,
-    section_head_width,
-    section_head_height,
-    section_head_vertical_text_align,
-    section_head_text_size,
-    section_head_text_color,
-    section_head_padding_dim,
-    elements_per_row,
-    element_height,
-    element_margin_dim,
+    body_width=800,
+    draw_area_margin_dim={'top': 10, 'right': 10, 'bottom': 10, 'left': 10},
+    font='Open Sans',
+    section_head_position='left',
+    section_head_width=200,
+    section_head_height=None,
+    # section_head_position='top',
+    # section_head_width=None,
+    # section_head_height=100,
+    section_head_vertical_text_align='top',
+    section_head_text_size=20,
+    section_head_text_color=dict_party_colours,
+    section_head_padding_dim={'top': 5, 'right': 5, 'bottom': 5, 'left': 5},
+    elements_per_row=elements_per_row,
+    element_height=50,
+    element_margin_dim={'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
 )
 
 # %%
