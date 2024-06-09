@@ -45,8 +45,7 @@ def lay_out_body(
     elements_per_row: int = 5,
     element_height: int = 50,
     element_margin_dim: dict = {'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
-
-):
+) -> draw.Drawing:
     """
     Lay out graphic body
 
