@@ -65,6 +65,7 @@ def lay_out_body(
         - section_head_vertical_text_align: Vertical alignment of text in section heads
         - section_head_text_size: Font size of text in section heads
         - section_head_text_color: Color of text in section heads
+        - section_head_padding_dim: Padding dimensions for section heads
         - elements_per_row: Number of elements to be displayed in each row
         - element_height: Height of each element
         - element_margin_dim: Margin dimensions for each element
