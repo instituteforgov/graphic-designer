@@ -23,6 +23,7 @@ from IPython.display import display
 import pandas as pd
 
 from lay_out_body import lay_out_body
+from format_graphic_data import format_graphic_data
 
 # %%
 # SET PARAMETERS
@@ -45,7 +46,7 @@ dict_party_colours = {
 elements_per_row = 5
 
 # %%
-# READ IN DATA AND CREATE SUBTOTALS
+# READ IN DATA AND EDIT
 # Create data
 df = pd.read_excel(
     'C:/Users/' + os.getlogin() + '/'
@@ -90,50 +91,26 @@ df['Constituency'] = df['Constituency'].map({
     'Fermanagh and South Tyrone': "Fermanagh and S. Tyrone",
 }).fillna(df['Constituency'])
 
-# Calculate subtotals by party
-df_subtotal = df.groupby(
-    by='Party',
-    as_index=False,
-).agg({
-    'Name': 'count'
-}).rename(
-    columns={
-        'Party': 'section',
-        'Name': 'MPs'
-    }
-).sort_values(
-    by='MPs',
-    ascending=False,
-).reset_index(drop=True)
-
-# Calculate maximum number of rows that will be needed per party
-# NB: This is an implementation of ceiling division
-# NB: Note that this may not be the number of rows we use in the final graphic - where
-# we use horizontal spacing between parties we may end up collapsing some rows
-df_subtotal['rows'] = df_subtotal['MPs'].apply(lambda x: -(-x // elements_per_row))
-
-# Make party names column categorical and set order
-df['Party'] = pd.Categorical(
-    df['Party'],
-    categories=df_subtotal['section'],
-    ordered=True,
+# %%
+# PRODUCE GRAPHIC DATA
+df_element, df_section = format_graphic_data(
+    df,
+    count_col='Name',
+    section_col='Party',
+    elements_per_row=elements_per_row,
 )
 
-# Sort data
-# NB: We sort by party first. Since 'Party' is a categorical column this sorts
-# by the pre-defined order
-# NB: Sorting by 'index' rather than 'Date announced' so that we get people who announce
-# on the same day in the right order
-df_sorted = df.reset_index().sort_values(
-    by=['Party', 'index'],
-    ascending=[True, True],
-).reset_index(drop=True)
+# %%
+df_element
+
+# %%
+df_section
 
 # %%
 # PRODUCE GRAPHIC
 graphic = lay_out_body(
-    df_sorted,
-    df_subtotal,
+    df_element,
+    df_section,
     body_width=800,
     draw_area_margin_dim={'top': 10, 'right': 10, 'bottom': 10, 'left': 10},
     font='Open Sans',

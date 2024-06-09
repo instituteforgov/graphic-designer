@@ -30,8 +30,8 @@ import cairosvg     # noqa: E402, F401
 
 # DEFINE FUNCTION
 def lay_out_body(
-    df: pd.DataFrame,
-    df_subtotal: pd.DataFrame = None,
+    df_element: pd.DataFrame,
+    df_section: pd.DataFrame,
     body_width: int = 800,
     draw_area_margin_dim: dict = {'top': 10, 'right': 10, 'bottom': 10, 'left': 10},
     font: str = 'Open Sans',
@@ -50,8 +50,8 @@ def lay_out_body(
     Lay out graphic body
 
     Parameters
-        - df: Data to be displayed in the graphic body
-        - df_subtotal: Subtotals for each section in df
+        - df_element: DataFrame of data to be used when drawing graphic elements
+        - df_section: DataFrame of section subtotals
         - body_width: Width of the graphic body
         - draw_area_margin_dim: Margin dimensions for the draw area
         - font: Font to be used in the graphic body
@@ -82,13 +82,13 @@ def lay_out_body(
     if section_head_position == 'left':
         draw_area_dim = {
             'width': body_width - draw_area_margin_dim['left'] - draw_area_margin_dim['right'],
-            'height': df_subtotal['rows'].sum() * element_height
+            'height': df_section['rows'].sum() * element_height
         }
     elif section_head_position == 'top':
         draw_area_dim = {
             'width': body_width - draw_area_margin_dim['left'] - draw_area_margin_dim['right'],
             'height': (
-                df_subtotal['rows'].sum() * element_height + len(df_subtotal) * section_head_height
+                df_section['rows'].sum() * element_height + len(df_section) * section_head_height
             )
         }
 
@@ -130,7 +130,7 @@ def lay_out_body(
     y = 0
 
     # Create sections
-    for i, row in df_subtotal.iterrows():
+    for i, row in df_section.iterrows():
 
         # Reset x
         x = 0
