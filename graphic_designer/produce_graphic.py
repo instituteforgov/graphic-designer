@@ -118,6 +118,7 @@ graphic = lay_out_body(
     # section_head_height=100,
     section_head_vertical_text_align='top',
     section_head_text_size=20,
+    section_head_text_weight=600,
     section_head_text_color=dict_party_colours,
     section_head_padding_dim={'top': 5, 'right': 5, 'bottom': 5, 'left': 5},
     elements_per_row=elements_per_row,
