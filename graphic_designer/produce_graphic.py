@@ -6,7 +6,7 @@
     Purpose
         Produce graphic
     Inputs
-        XXX
+        None
     Outputs
         None
     Parameters
@@ -98,15 +98,10 @@ df_element, df_section = format_graphic_data(
     count_col='Name',
     section_col='Party',
     elements_per_row=elements_per_row,
+    section_sort_by='elements',
+    section_sort_order='descending',
 )
 
-# %%
-df_element
-
-# %%
-df_section
-
-# %%
 # PRODUCE GRAPHIC
 graphic = lay_out_body(
     df_element,
@@ -129,7 +124,6 @@ graphic = lay_out_body(
     element_margin_dim={'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
 )
 
-# %%
 # DISPLAY GRAPHIC
 display(graphic)
 

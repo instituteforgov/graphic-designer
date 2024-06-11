@@ -14,6 +14,8 @@
         None
 """
 
+from typing import Literal, Optional, Union
+
 import pandas as pd
 
 
@@ -22,6 +24,8 @@ def format_graphic_data(
     count_col: str,
     section_col: str,
     elements_per_row: int,
+    section_sort_by: Union[Literal['section', 'elements'], list] = 'elements',
+    section_sort_order: Optional[Literal['ascending', 'descending']] = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Produce graphic data
@@ -33,10 +37,18 @@ def format_graphic_data(
         - section_col: Column in df giving which section each row belongs to. This should
         be a column in df and should not contain any missing values
         - elements_per_row: Number of elements to be drawn per row
+        - section_sort_by: Order by which to sort the sections. Either 'section', 'elements'
+        or a list of section names. If 'section' this will sort by the section names. If
+        'elements' this will sort by the number of elements in each section. If a list of
+        section names this will sort by the specified order. If a list is used, all sections
+        in section_col must be included
+        - section_sort_order: Order in which to sort the sections. Not applied if section_sort_by
+        is a list
 
     Returns
         - df_element: DataFrame of data to be used when drawing graphic elements
-        - df_section: DataFrame of section subtotals
+        - df_section: DataFrame of section subtotals with columns section, elements and
+        rows
 
     Notes
         - None
@@ -44,6 +56,23 @@ def format_graphic_data(
     # Check that section_col doesn't contain any missing values
     if df[section_col].isnull().any():
         raise ValueError(f"Missing values found in {section_col}")
+
+    # Check that if section_sort_by is a list all elements are in df['section_col']
+    if isinstance(section_sort_by, list):
+        if not all([x in df[section_col].unique() for x in section_sort_by]):
+            values_not_found = [x for x in section_sort_by if x not in df[section_col].unique()]
+            raise ValueError(
+                f"Values in section_sort_by not found in {section_col}: {values_not_found}"
+            )
+
+    # Check that if section_sort_by is a list all elements in df['section_col'] are
+    # in section_sort_by
+    if isinstance(section_sort_by, list):
+        if not all([x in section_sort_by for x in df[section_col].unique()]):
+            values_not_found = [x for x in df[section_col].unique() if x not in section_sort_by]
+            raise ValueError(
+                f"Values in section_col not found in section_sort_by: {values_not_found}"
+            )
 
     # Create DataFrame of elements
     df_element = df.copy()
@@ -63,15 +92,35 @@ def format_graphic_data(
             section_col: 'section',
             count_col: 'elements'
         }
-    ).sort_values(
-        by='elements',
-        ascending=False,
-    ).reset_index(drop=True)
+    )
+
+    # Sort df_section
+    if section_sort_by in ['section', 'elements']:
+
+        df_section = df_section.sort_values(
+            by=section_sort_by,
+            ascending=section_sort_order == 'ascending',
+        ).reset_index(drop=True)
+
+    elif isinstance(section_sort_by, list):
+
+        # Make section column categorical with ordering
+        df_section['section'] = pd.Categorical(
+            df_section['section'],
+            categories=section_sort_by,
+            ordered=True,
+        )
+
+        # Sort
+        df_section = df_section.sort_values(
+            by='section',
+            ascending=True,
+        ).reset_index(drop=True)
 
     # Calculate number of rows needed for each section
     df_section['rows'] = df_section['elements'].apply(lambda x: -(-x // elements_per_row))
 
-    # Make section column categorical with ordering, following the ordering of df_section
+    # Make df_element section column categorical with ordering, following ordering of df_section
     df_element[section_col] = pd.Categorical(
         df_element[section_col],
         categories=df_section['section'],
