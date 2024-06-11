@@ -133,6 +133,6 @@ def format_graphic_data(
     df_element = df_element.reset_index().sort_values(
         by=[section_col, 'index'],
         ascending=[True, True],
-    ).reset_index(drop=True)
+    ).reset_index(drop=True).drop(columns='index')
 
     return df_element, df_section
