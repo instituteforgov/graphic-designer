@@ -95,8 +95,9 @@ df['Constituency'] = df['Constituency'].map({
 # PRODUCE GRAPHIC DATA
 df_element, df_section = format_graphic_data(
     df,
-    count_col='Name',
     section_col='Party',
+    element_title_col='Name',
+    element_subtitle_col='Constituency',
     elements_per_row=elements_per_row,
     section_sort_by='elements',
     section_sort_order='descending',
