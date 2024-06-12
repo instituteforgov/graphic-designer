@@ -115,15 +115,16 @@ graphic = lay_out_body(
     section_head_height=None,
     # section_head_position='top',
     # section_head_width=None,
-    # section_head_height=100,
+    # section_head_height=50,
     section_head_vertical_text_align='top',
     section_head_text_size=20,
     section_head_text_weight=600,
     section_head_text_color=dict_party_colours,
     section_head_padding_dim={'top': 5, 'right': 5, 'bottom': 5, 'left': 5},
     elements_per_row=elements_per_row,
-    element_height=50,
+    element_height=100,
     element_margin_dim={'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
+    merge_sections=['Sinn Féin', 'Green', 'Plaid Cymru'],
 )
 
 # DISPLAY GRAPHIC

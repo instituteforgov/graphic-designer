@@ -46,6 +46,7 @@ def lay_out_body(
     elements_per_row: int = 5,
     element_height: int = 50,
     element_margin_dim: dict = {'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
+    merge_sections: list = []
 ) -> draw.Drawing:
     """
     Lay out graphic body
@@ -72,6 +73,10 @@ def lay_out_body(
         - elements_per_row: Number of elements to be displayed in each row
         - element_height: Height of each element
         - element_margin_dim: Margin dimensions for each element
+        - merge_sections: List of sections to merge. Only applicable where
+        section_head_position is 'top', as sections can't be merged where
+        section_head_position is 'left'. Sections to merge must fit onto
+        a single row, and be supplied in the order they appear in the data.
 
     Returns
         - body: Graphic body
@@ -80,17 +85,59 @@ def lay_out_body(
         - None
     """
 
+    # Calculate total row count
+    total_rows = df_section['rows'].sum()
+    section_heads = len(df_section)
+
+    # Handle merge_sections
+    if section_head_position == 'top' and merge_sections:
+
+        # Check sections to be merged fit onto a single row
+        merge_sections_elements = df_section.loc[
+            df_section['section'].isin(merge_sections),
+            'elements'
+        ].sum()
+        if merge_sections_elements > elements_per_row:
+            raise ValueError(
+                'Sections to merge must fit onto a single row. Sections supplied in ' +
+                f'merge_sections have {merge_sections_elements} elements, but ' +
+                f'elements_per_row is {elements_per_row}'
+            )
+
+        # Check sections to be merged are in the correct order
+        if df_section.loc[
+            df_section['section'].isin(merge_sections),
+            'section'
+        ].tolist() != merge_sections:
+            raise ValueError(
+                'Sections to merge must be supplied in the order they appear in the data'
+            )
+
+        # Adjust total row count
+        merge_rows_initial = df_section.loc[
+            df_section['section'].isin(merge_sections)
+        ]['rows'].sum()
+        merge_rows_final = - (
+            - df_section.loc[
+                df_section['section'].isin(merge_sections)
+            ]['elements'].sum() // elements_per_row
+        )
+        total_rows = total_rows - merge_rows_initial + merge_rows_final
+
+        # Adjust section_heads count
+        section_heads = section_heads - len(merge_sections) + 1
+
     # Calculate draw area, body dimensions
     if section_head_position == 'left':
         draw_area_dim = {
             'width': body_width - draw_area_margin_dim['left'] - draw_area_margin_dim['right'],
-            'height': df_section['rows'].sum() * element_height
+            'height': total_rows * element_height
         }
     elif section_head_position == 'top':
         draw_area_dim = {
             'width': body_width - draw_area_margin_dim['left'] - draw_area_margin_dim['right'],
             'height': (
-                df_section['rows'].sum() * element_height + len(df_section) * section_head_height
+                total_rows * element_height + section_heads * section_head_height
             )
         }
 
@@ -134,9 +181,6 @@ def lay_out_body(
     # Create sections
     for i, row in df_section.iterrows():
 
-        # Reset x
-        x = 0
-
         # Calculate section dimensions
         # NB: By calculating left_section_head_dim, top_section_head_dim for both
         # section_head_position options, this simplifies the logic that comes after
@@ -172,7 +216,7 @@ def lay_out_body(
         draw_area.append(
             draw.Rectangle(
                 x=x, y=y,
-                width=section_head_dim['width'], height=section_head_dim['height'],
+                width=section_head_dim['width'] - x, height=section_head_dim['height'],
                 fill='lightgrey', stroke_width=0
             )
         )
@@ -220,7 +264,7 @@ def lay_out_body(
         draw_area.append(
             draw.Rectangle(
                 x=x, y=y,
-                width=section_body_dim['width'], height=section_body_dim['height'],
+                width=section_body_dim['width'] - x, height=section_body_dim['height'],
                 fill=f"#{random.randint(0, 0xFFFFFF):06x}", stroke_width=0
             )
         )
@@ -234,6 +278,23 @@ def lay_out_body(
         #     'width': section_body_dim['width'] / elements_per_row,
         #     'height': element_height
         # }
+
+        # Reset y pointer where section is merged
+        # NB: This moves the y pointer back to the top of the previous section
+        # head and pre-emptively resets x back the end of the previous row
+        # NB: Excluding penultimate section, as we don't want to reset the y
+        # pointer for the final section
+        if row['section'] in merge_sections[:-1]:
+            y -= top_section_head_dim['height']
+            y -= section_body_dim['height']
+
+        # Set x pointer
+        # NB: Excluding penultimate section, as we don't want to reset the y
+        # pointer for the final section
+        if not row['section'] in merge_sections[:-1]:
+            x = 0
+        else:
+            x += 200
 
     # Add draw_area to body
     body.append(draw_area)
