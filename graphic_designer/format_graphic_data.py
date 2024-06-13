@@ -49,7 +49,8 @@ def format_graphic_data(
         is a list
 
     Returns
-        - df_element: DataFrame of data to be used when drawing graphic elements
+        - df_element: DataFrame of element data with columns section, element_title,
+        element_subtitle and element_image
         - df_section: DataFrame of section subtotals with columns section, elements and
         rows
 
@@ -82,18 +83,24 @@ def format_graphic_data(
         section_col, element_title_col, element_subtitle_col, element_image_col
     ]].copy()
 
+    # Rename columns
+    df_element = df_element.rename(
+        columns={
+            section_col: 'section',
+            element_title_col: 'element_title',
+            element_subtitle_col: 'element_subtitle',
+            element_image_col: 'element_image',
+        }
+    )
+
     # Drop rows with missing values in section_col
-    df_element = df_element.dropna(subset=[section_col])
+    df_element = df_element.dropna(subset='section')
 
     # Calculate subtotals by section
     df_section = pd.DataFrame(
-        df_element.groupby(section_col).size(),
+        df_element.groupby('section').size(),
         columns=['elements']
-    ).reset_index().rename(
-        columns={
-            section_col: 'section',
-        }
-    )
+    ).reset_index()
 
     # Sort df_section
     if section_sort_by in ['section', 'elements']:
@@ -122,8 +129,8 @@ def format_graphic_data(
     df_section['rows'] = df_section['elements'].apply(lambda x: -(-x // elements_per_row))
 
     # Make df_element section column categorical with ordering, following ordering of df_section
-    df_element[section_col] = pd.Categorical(
-        df_element[section_col],
+    df_element['section'] = pd.Categorical(
+        df_element['section'],
         categories=df_section['section'],
         ordered=True,
     )
@@ -132,7 +139,7 @@ def format_graphic_data(
     # NB: Since section is a categorical column this sorts by the pre-defined order
     # NB: Sorting by 'index' applies the original order as a secondary ordering
     df_element = df_element.reset_index().sort_values(
-        by=[section_col, 'index'],
+        by=['section', 'index'],
         ascending=[True, True],
     ).reset_index(drop=True).drop(columns='index')
 
