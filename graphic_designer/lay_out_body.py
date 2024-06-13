@@ -317,16 +317,12 @@ def lay_out_body(
         # Reset y pointer where section is merged
         # NB: This moves the y pointer back to the top of the previous section
         # head and pre-emptively resets x back the end of the previous row
-        # NB: Excluding penultimate section, as we don't want to reset the y
-        # pointer for the final section
-        if section_head_position == 'top' and row['section'] in merge_sections[:-1]:
+        if section_head_position == 'top' and row['section'] in merge_sections:
             y -= top_section_head_dim['height']
             y -= section_body_dim['height']
 
         # Set x pointer
-        # NB: Excluding penultimate section, as we don't want to reset the y
-        # pointer for the final section
-        if not (section_head_position == 'top' and row['section'] in merge_sections[:-1]):
+        if not (section_head_position == 'top' and row['section'] in merge_sections):
             x = 0
         else:
             x += element_i * element_dim['width']
