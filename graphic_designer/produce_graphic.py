@@ -22,8 +22,8 @@ import os
 from IPython.display import display
 import pandas as pd
 
-from lay_out_body import lay_out_body
 from format_graphic_data import format_graphic_data
+from lay_out_body import lay_out_body
 
 # %%
 # SET PARAMETERS
