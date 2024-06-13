@@ -12,6 +12,8 @@
     Parameters
         - ifg_dark_grey: Colour used for text
         - dict_party_colours: Party colours
+        - image_filepath_stub: Stub of image filepaths
+        - image_source: Non-default image sources
         - See lay_out_body()
     Notes
         None
