@@ -24,6 +24,7 @@ def format_graphic_data(
     section_col: str,
     element_title_col: str,
     element_subtitle_col: str,
+    element_image_col: str,
     elements_per_row: int,
     section_sort_by: Union[Literal['section', 'elements'], list] = 'elements',
     section_sort_order: Optional[Literal['ascending', 'descending']] = None,
@@ -37,6 +38,7 @@ def format_graphic_data(
         be a column in df and should not contain any missing values
         - element_title_col: Column in df of element titles
         - element_subtitle_col: Column in df of element subtitles
+        - element_image_col: Column in df of element image filepaths
         - elements_per_row: Number of elements to be drawn per row
         - section_sort_by: Order by which to sort the sections. Either 'section', 'elements'
         or a list of section names. If 'section' this will sort by the section names. If
@@ -76,7 +78,9 @@ def format_graphic_data(
             )
 
     # Create DataFrame of elements
-    df_element = df[[section_col, element_title_col, element_subtitle_col]].copy()
+    df_element = df[[
+        section_col, element_title_col, element_subtitle_col, element_image_col
+    ]].copy()
 
     # Drop rows with missing values in section_col
     df_element = df_element.dropna(subset=[section_col])

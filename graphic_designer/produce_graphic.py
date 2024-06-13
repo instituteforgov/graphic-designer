@@ -43,6 +43,20 @@ dict_party_colours = {
     'Independent': '#c1c5c8',
 }
 
+# Image locations
+image_filepath_stub = (
+    'C:/Users/' + os.getlogin() + '/'
+    'Institute for Government/Data - General/'
+    'Parliament/Member portraits/Images/'
+)
+
+# Set parameter specifying non-default image sources
+image_source = {
+    'Francie Molloy': 'Alamy/',
+    'Mickey Brady': 'Alamy/',
+}
+
+# Graphic parameters
 elements_per_row = 5
 
 # %%
@@ -91,6 +105,30 @@ df['Constituency'] = df['Constituency'].map({
     'Fermanagh and South Tyrone': "Fermanagh and S. Tyrone",
 }).fillna(df['Constituency'])
 
+# Add image filepaths
+for i, row in df.iterrows():
+
+    # Identify filepath
+    if row['Name'] in image_source:
+        image_filepath = (
+            image_filepath_stub + image_source[row['Name']]
+        )
+    else:
+        image_filepath = (
+            image_filepath_stub + 'Parliament/'
+        )
+
+    try:
+        filename = [
+            filename for filename in os.listdir(image_filepath)
+            if filename.startswith(str(int(row['Parliament ID'])) + '-')
+        ][-1]
+    except IndexError:
+        pass
+
+    # Add to df
+    df.loc[i, 'Image filepath'] = image_filepath + filename
+
 # %%
 # PRODUCE GRAPHIC DATA
 df_element, df_section = format_graphic_data(
@@ -98,6 +136,7 @@ df_element, df_section = format_graphic_data(
     section_col='Party',
     element_title_col='Name',
     element_subtitle_col='Constituency',
+    element_image_col='Image filepath',
     elements_per_row=elements_per_row,
     section_sort_by='elements',
     section_sort_order='descending',
