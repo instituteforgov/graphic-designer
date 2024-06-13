@@ -212,6 +212,12 @@ def lay_out_body(
             'height': row['rows'] * element_height
         }
 
+        # Calculate element dimensions
+        element_dim = {
+            'width': section_body_dim['width'] / elements_per_row,
+            'height': element_height
+        }
+
         # Draw section head
         draw_area.append(
             draw.Rectangle(
@@ -260,24 +266,53 @@ def lay_out_body(
         x += left_section_head_dim['width']
         y += top_section_head_dim['height']
 
-        # Draw section body
-        draw_area.append(
-            draw.Rectangle(
-                x=x, y=y,
-                width=section_body_dim['width'] - x, height=section_body_dim['height'],
-                fill=f"#{random.randint(0, 0xFFFFFF):06x}", stroke_width=0
-            )
-        )
+        # Initialise counter and pointers
+        # NB: A seperate counter is used to track the element number, as iterrows()'s
+        # j tracks all rows in df_element, not just the rows for the current section
+        element_i = 0
 
-        y += section_body_dim['height']
+        element_x = x
+        element_y = y
 
         # Draw elements
-        # Calculate element dimensions
-        # TODO
-        # element_dim = {
-        #     'width': section_body_dim['width'] / elements_per_row,
-        #     'height': element_height
-        # }
+        for j, element_row in df_element.loc[
+            df_element['section'] == row['section']
+        ].iterrows():
+
+            # Iterate counter
+            element_i += 1
+
+            # Draw element
+            draw_area.append(
+                draw.Rectangle(
+                    x=element_x, y=element_y,
+                    width=element_dim['width'],
+                    height=element_dim['height'],
+                    fill=f"#{random.randint(0, 0xFFFFFF):06x}",
+                    stroke_width=0
+                )
+            )
+            draw_area.append(
+                draw.Text(
+                    str(element_i),
+                    x=element_x, y=element_y,
+                    font_size=section_head_text_size,
+                    font_weight=section_head_text_weight,
+                    font_family=font,
+                    fill='black',
+                    text_anchor='start',
+                    dominant_baseline='hanging'
+                )
+            )
+
+            # Check if row is complete
+            if (element_i) % elements_per_row == 0:
+                element_x = x
+                element_y += element_dim['height']
+            else:
+                element_x += element_dim['width']
+
+        y += section_body_dim['height']
 
         # Reset y pointer where section is merged
         # NB: This moves the y pointer back to the top of the previous section
@@ -294,7 +329,7 @@ def lay_out_body(
         if not (section_head_position == 'top' and row['section'] in merge_sections[:-1]):
             x = 0
         else:
-            x += 200
+            x += element_i * element_dim['width']
 
     # Add draw_area to body
     body.append(draw_area)
