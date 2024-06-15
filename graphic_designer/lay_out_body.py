@@ -28,6 +28,44 @@ os.environ['path'] += r';C:/Program Files/Inkscape/bin'
 import cairosvg     # noqa: E402, F401
 
 
+def calculate_offset_element_totals(
+    elements: int,
+    elements_per_row: int,
+) -> list[int]:
+    """
+    For a given total number of elements, produce a list where
+    each element is the total number of elements up to the end
+    of the corresponding row in a graphic where rows are offset
+
+    Parameters
+        - elements: Number of elements in the section
+        - elements_per_row: Number of elements to be drawn per row. Where offset_rows is
+        True, this will be the number of elements in the odd rows of each section and
+        even rows will contain one fewer element
+
+    Returns
+        - List of element totals
+
+    Notes
+        - None
+    """
+
+    # Initialize the sequence with the first term
+    sequence = [elements_per_row]
+
+    # Generate the sequence for n terms
+    i = 1
+    while sequence[-1] < elements:
+        if i % 2 != 0:
+            next_term = sequence[-1] + elements_per_row - 1
+        else:
+            next_term = sequence[-1] + elements_per_row
+        sequence.append(next_term)
+        i += 1
+
+    return sequence
+
+
 # DEFINE FUNCTION
 def lay_out_body(
     df_element: pd.DataFrame,
@@ -44,6 +82,7 @@ def lay_out_body(
     section_head_text_color: Union[str, dict] = 'black',
     section_head_padding_dim: dict = {'top': 5, 'right': 5, 'bottom': 5, 'left': 5},
     elements_per_row: int = 5,
+    offset_rows: bool = False,
     element_height: int = 50,
     element_margin_dim: dict = {'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
     merge_sections: list = []
@@ -70,7 +109,11 @@ def lay_out_body(
         color is applied to all section heads. If a dictionary, each key should be a
         section name and the corresponding value should be the color for that section
         - section_head_padding_dim: Padding dimensions for section heads
-        - elements_per_row: Number of elements to be displayed in each row
+        - elements_per_row: Number of elements to be drawn per row. Where offset_rows is
+        True, this will be the number of elements in the odd rows of each section and
+        even rows will contain one fewer element
+        - offset_rows: Whether every other row should be offset relative to the previous
+        row and contain one fewer element
         - element_height: Height of each element
         - element_margin_dim: Margin dimensions for each element
         - merge_sections: List of sections to merge. Only applicable where
@@ -274,6 +317,13 @@ def lay_out_body(
         element_x = x
         element_y = y
 
+        # Calculate list of element totals
+        if offset_rows:
+            element_totals = calculate_offset_element_totals(
+                elements=row['elements'],
+                elements_per_row=elements_per_row
+            )
+
         # Draw elements
         for j, element_row in df_element.loc[
             df_element['section'] == row['section']
@@ -306,11 +356,29 @@ def lay_out_body(
             )
 
             # Check if row is complete
-            if (element_i) % elements_per_row == 0:
-                element_x = x
-                element_y += element_dim['height']
+            if offset_rows:
+
+                if element_i in element_totals:
+
+                    # After odd rows (0-based indexing), apply offset
+                    if element_totals.index(element_i) % 2 != 0:
+                        element_x = x
+                        element_y += element_dim['height']
+
+                    # After even rows, don't apply offset
+                    else:
+                        element_x = x + element_dim['width'] / 2
+                        element_y += element_dim['height']
+
+                else:
+                    element_x += element_dim['width']
+
             else:
-                element_x += element_dim['width']
+                if element_i % elements_per_row == 0:
+                    element_x = x
+                    element_y += element_dim['height']
+                else:
+                    element_x += element_dim['width']
 
         y += section_body_dim['height']
 

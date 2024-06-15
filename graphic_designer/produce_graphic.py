@@ -60,6 +60,7 @@ image_source = {
 
 # Graphic parameters
 elements_per_row = 5
+offset_rows = False
 
 # %%
 # READ IN DATA AND EDIT
@@ -140,6 +141,7 @@ df_element, df_section = format_graphic_data(
     element_subtitle_col='Constituency',
     element_image_col='Image filepath',
     elements_per_row=elements_per_row,
+    offset_rows=offset_rows,
     section_sort_by='elements',
     section_sort_order='descending',
 )
@@ -152,18 +154,20 @@ graphic = lay_out_body(
     draw_area_margin_dim={'top': 10, 'right': 10, 'bottom': 10, 'left': 10},
     font='Open Sans',
     section_head_position='left',
-    section_head_width=200,
+    section_head_width=225,
     section_head_height=None,
     # section_head_position='top',
     # section_head_width=None,
-    # section_head_height=50,
+    # section_head_height=35,
     section_head_vertical_text_align='top',
     section_head_text_size=20,
     section_head_text_weight=600,
     section_head_text_color=dict_party_colours,
     section_head_padding_dim={'top': 5, 'right': 5, 'bottom': 5, 'left': 5},
     elements_per_row=elements_per_row,
-    element_height=100,
+    offset_rows=offset_rows,
+    element_height=(800-225-10-10)/5,
+    # element_height=(800-10-10)/5,
     element_margin_dim={'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
     merge_sections=['Sinn Féin', 'Green', 'Plaid Cymru'],
 )

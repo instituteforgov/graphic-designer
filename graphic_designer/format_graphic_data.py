@@ -19,6 +19,36 @@ from typing import Literal, Optional, Union
 import pandas as pd
 
 
+def calculate_offset_rows(
+    elements: int,
+    elements_per_row: int,
+) -> int:
+    """
+    Calculate number of rows needed for a section with an offset
+
+    Parameters
+        - elements: Number of elements in the section
+        - elements_per_row: Number of elements to be drawn per row. Where offset_rows is
+        True, this will be the number of elements in the odd rows of each section and
+        even rows will contain one fewer element
+
+    Returns
+        - Number of rows needed for the section
+
+    Notes
+        - None
+    """
+    complete_row_pairs = elements // (2 * elements_per_row - 1)
+    complete_row_pair_elements = complete_row_pairs * (2 * elements_per_row - 1)
+    remaining_elements = elements - complete_row_pair_elements
+    if remaining_elements == 0:
+        return 2 * complete_row_pairs
+    elif remaining_elements <= elements_per_row:
+        return 2 * complete_row_pairs + 1
+    else:
+        return 2 * complete_row_pairs + 2
+
+
 def format_graphic_data(
     df: pd.DataFrame,
     section_col: str,
@@ -26,6 +56,7 @@ def format_graphic_data(
     element_subtitle_col: str,
     element_image_col: str,
     elements_per_row: int,
+    offset_rows: bool = False,
     section_sort_by: Union[Literal['section', 'elements'], list] = 'elements',
     section_sort_order: Optional[Literal['ascending', 'descending']] = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -39,7 +70,11 @@ def format_graphic_data(
         - element_title_col: Column in df of element titles
         - element_subtitle_col: Column in df of element subtitles
         - element_image_col: Column in df of element image filepaths
-        - elements_per_row: Number of elements to be drawn per row
+        - elements_per_row: Number of elements to be drawn per row. Where offset_rows is
+        True, this will be the number of elements in the odd rows of each section and
+        even rows will contain one fewer element
+        - offset_rows: Whether ever other row should be offset relative to the previous row
+        and contain one fewer element
         - section_sort_by: Order by which to sort the sections. Either 'section', 'elements'
         or a list of section names. If 'section' this will sort by the section names. If
         'elements' this will sort by the number of elements in each section. If a list of
@@ -126,7 +161,12 @@ def format_graphic_data(
         ).reset_index(drop=True)
 
     # Calculate number of rows needed for each section
-    df_section['rows'] = df_section['elements'].apply(lambda x: -(-x // elements_per_row))
+    if offset_rows:
+        df_section['rows'] = df_section['elements'].apply(
+            lambda x: calculate_offset_rows(x, elements_per_row)
+        )
+    else:
+        df_section['rows'] = df_section['elements'].apply(lambda x: -(-x // elements_per_row))
 
     # Make df_element section column categorical with ordering, following ordering of df_section
     df_element['section'] = pd.Categorical(
