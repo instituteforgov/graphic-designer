@@ -85,6 +85,7 @@ def lay_out_body(
     offset_rows: bool = False,
     element_height: int = 50,
     element_margin_dim: dict = {'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
+    display_section_totals: bool = False,
     merge_sections: list = []
 ) -> draw.Drawing:
     """
@@ -116,6 +117,7 @@ def lay_out_body(
         row and contain one fewer element
         - element_height: Height of each element
         - element_margin_dim: Margin dimensions for each element
+        - display_section_totals: Whether section totals should be displayed
         - merge_sections: List of sections to merge. Only applicable where
         section_head_position is 'top', as sections can't be merged where
         section_head_position is 'left'. Sections to merge must fit onto
@@ -294,9 +296,14 @@ def lay_out_body(
         else:
             text_color = section_head_text_color
 
+        if display_section_totals:
+            section_head_text = f"{row['section']}: {row['elements']}"
+        else:
+            section_head_text = row['section']
+
         draw_area.append(
             draw.Text(
-                row['section'],
+                section_head_text,
                 x=text_x, y=text_y,
                 font_size=section_head_text_size,
                 font_weight=section_head_text_weight,

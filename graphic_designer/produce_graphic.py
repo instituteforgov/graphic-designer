@@ -169,6 +169,7 @@ graphic = lay_out_body(
     element_height=(800-225-10-10)/5,
     # element_height=(800-10-10)/5,
     element_margin_dim={'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
+    display_section_totals=True,
     merge_sections=['Sinn Féin', 'Green', 'Plaid Cymru'],
 )
 
