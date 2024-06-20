@@ -14,7 +14,9 @@
         - dict_party_colours: Party colours
         - image_filepath_stub: Stub of image filepaths
         - image_source: Non-default image sources
-        - See lay_out_body()
+        - See format_graphic_data(), lay_out_body(),
+        add_header_footer() docstrings for description of
+        further parameters
     Notes
         None
 """
@@ -36,8 +38,8 @@ dict_party_colours = {
     'Conservative': '#00539f',
     'Labour': '#ee3224',
     'Liberal Democrat': '#ffb703',
-    'Scottish National Party': '#fff95d',
-    'PC': '#3f8429',
+    'Scottish National\nParty': '#fff95d',
+    'Plaid Cymru': '#3f8429',
     'Green': '#6ab023',
     'Reform UK': '#3bb7ce',
     'Democratic Unionist Party': '#8f1d20',
@@ -89,7 +91,7 @@ df[['First name', 'Last name']] = df['Name'].str.split(
 # Expand 'SNP'
 # NB: fillna() is needed as this is a non-exhaustive mapping
 df['Party'] = df['Party'].map(
-    {'SNP': 'Scottish National Party'}
+    {'SNP': 'Scottish National\nParty'}
 ).fillna(df['Party'])
 
 # Abbreviate long constituency names
@@ -122,7 +124,7 @@ for i, row in df.iterrows():
         )
 
     try:
-        filename = [
+        image_filename = [
             filename for filename in os.listdir(image_filepath)
             if filename.startswith(str(int(row['Parliament ID'])) + '-')
         ][-1]
@@ -130,7 +132,7 @@ for i, row in df.iterrows():
         pass
 
     # Add to df
-    df.loc[i, 'Image filepath'] = image_filepath + filename
+    df.loc[i, 'Image filepath'] = image_filepath + image_filename
 
 # %%
 # PRODUCE GRAPHIC DATA
@@ -147,7 +149,7 @@ df_element, df_section = format_graphic_data(
 )
 
 # PRODUCE GRAPHIC
-graphic = lay_out_body(
+body = lay_out_body(
     df_element,
     df_section,
     body_width=800,
@@ -163,12 +165,22 @@ graphic = lay_out_body(
     section_head_text_size=20,
     section_head_text_weight=600,
     section_head_text_color=dict_party_colours,
+    section_head_background_color='white',
     section_head_padding_dim={'top': 5, 'right': 5, 'bottom': 5, 'left': 5},
     elements_per_row=elements_per_row,
     offset_rows=offset_rows,
     element_height=(800-225-10-10)/5,
     # element_height=(800-10-10)/5,
-    element_margin_dim={'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
+    element_title_position='bottom',
+    element_title_text_size=10,
+    element_title_text_weight=400,
+    element_subtitle_text_size=8,
+    element_subtitle_text_weight=400,
+    element_subtitle_text_style='italic',
+    element_circle_stroke_width=5,
+    element_background_color='white',
+    element_margin_dim={'top': 5, 'right': 2, 'bottom': 5, 'left': 2},
+    element_circle_padding_dim={'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
     display_section_totals=True,
     merge_sections=['Sinn Féin', 'Green', 'Plaid Cymru'],
 )

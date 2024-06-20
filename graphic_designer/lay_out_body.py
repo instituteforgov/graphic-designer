@@ -15,11 +15,12 @@
 """
 
 import os
-import random
-from typing import Literal, Union
+from typing import Literal, TextIO, Union
 
 import drawsvg as draw
 import pandas as pd
+
+from draw_element import draw_element
 
 # Import cairosvg from its DLL
 # NB: Following the approach described here and in related
@@ -80,14 +81,25 @@ def lay_out_body(
     section_head_text_size: int = 20,
     section_head_text_weight: int = 600,
     section_head_text_color: Union[str, dict] = 'black',
+    section_head_background_color: str = 'white',
     section_head_padding_dim: dict = {'top': 5, 'right': 5, 'bottom': 5, 'left': 5},
     elements_per_row: int = 5,
     offset_rows: bool = False,
     element_height: int = 50,
+    element_title_position: Literal['top', 'bottom'] = 'bottom',
+    element_title_text_size: int = 10,
+    element_title_text_weight: int = 400,
+    element_title_text_style: str = None,
+    element_subtitle_text_size: int = 8,
+    element_subtitle_text_weight: int = 400,
+    element_subtitle_text_style: str = None,
+    element_circle_stroke_width: int = 2,
+    element_background_color: str = 'white',
     element_margin_dim: dict = {'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
+    element_circle_padding_dim: dict = {'top': 2, 'right': 2, 'bottom': 2, 'left': 2},
     display_section_totals: bool = False,
     merge_sections: list = []
-) -> draw.Drawing:
+) -> TextIO:
     """
     Lay out graphic body
 
@@ -109,6 +121,7 @@ def lay_out_body(
         - section_head_text_color: Color of text in section heads. If a string, this
         color is applied to all section heads. If a dictionary, each key should be a
         section name and the corresponding value should be the color for that section
+        - section_head_background_color: Background color of section heads
         - section_head_padding_dim: Padding dimensions for section heads
         - elements_per_row: Number of elements to be drawn per row. Where offset_rows is
         True, this will be the number of elements in the odd rows of each section and
@@ -116,7 +129,17 @@ def lay_out_body(
         - offset_rows: Whether every other row should be offset relative to the previous
         row and contain one fewer element
         - element_height: Height of each element
+        - element_title_position: Position of element titles. Options are 'top' or 'bottom'
+        - element_title_text_size: Font size of element titles
+        - element_title_text_weight: Font weight of element titles
+        - element_title_text_style: Font style of element titles
+        - element_subtitle_text_size: Font size of element subtitles
+        - element_subtitle_text_weight: Font weight of element subtitles
+        - element_subtitle_text_style: Font style of element subtitles
+        - element_circle_stroke_width: Stroke width of circle
+        - element_background_color: Background color of elements
         - element_margin_dim: Margin dimensions for each element
+        - element_circle_padding_dim: Padding dimensions for element circles
         - display_section_totals: Whether section totals should be displayed
         - merge_sections: List of sections to merge. Only applicable where
         section_head_position is 'top', as sections can't be merged where
@@ -268,7 +291,8 @@ def lay_out_body(
             draw.Rectangle(
                 x=x, y=y,
                 width=section_head_dim['width'] - x, height=section_head_dim['height'],
-                fill='lightgrey', stroke_width=0
+                fill=section_head_background_color,
+                stroke_width=0
             )
         )
 
@@ -341,24 +365,29 @@ def lay_out_body(
 
             # Draw element
             draw_area.append(
-                draw.Rectangle(
-                    x=element_x, y=element_y,
+                draw_element(
+                    x=element_x,
+                    y=element_y,
                     width=element_dim['width'],
                     height=element_dim['height'],
-                    fill=f"#{random.randint(0, 0xFFFFFF):06x}",
-                    stroke_width=0
-                )
-            )
-            draw_area.append(
-                draw.Text(
-                    str(element_i),
-                    x=element_x, y=element_y,
-                    font_size=section_head_text_size,
-                    font_weight=section_head_text_weight,
+                    background_color=element_background_color,
+                    title=element_row['element_title'],
+                    title_text_size=element_title_text_size,
+                    title_text_weight=element_title_text_weight,
+                    title_text_style=element_title_text_style,
+                    subtitle=element_row['element_subtitle'],
+                    subtitle_text_size=element_subtitle_text_size,
+                    subtitle_text_weight=element_subtitle_text_weight,
+                    subtitle_text_style=element_subtitle_text_style,
                     font_family=font,
-                    fill='black',
-                    text_anchor='start',
-                    dominant_baseline='hanging'
+                    text_color='black',
+                    title_position=element_title_position,
+                    text_anchor='middle',
+                    image=element_row['element_image'],
+                    margin_dim=element_margin_dim,
+                    circle_stroke_width=element_circle_stroke_width,
+                    circle_stroke_color=section_head_text_color[element_row['section']],
+                    circle_padding_dim=element_circle_padding_dim
                 )
             )
 
