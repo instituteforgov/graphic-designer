@@ -434,4 +434,5 @@ def lay_out_body(
     # Add draw_area to body
     body.append(draw_area)
 
-    return body
+    # Convert from drawsvg object to SVG
+    return body.as_svg()
