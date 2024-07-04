@@ -129,6 +129,7 @@ for i, row in df.iterrows():
             if filename.startswith(str(int(row['Parliament ID'])) + '-')
         ][-1]
     except IndexError:
+        print(i, row['Parliament ID'], row['Name'])
         pass
 
     # Add to df
