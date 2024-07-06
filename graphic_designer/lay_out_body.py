@@ -387,6 +387,15 @@ def lay_out_body(
             # Iterate counter
             element_i += 1
 
+            # Set circle stroke color
+            if isinstance(section_head_text_color, dict):
+                if element_row['section'] in section_head_text_color:
+                    circle_stroke_color = section_head_text_color[element_row['section']]
+                else:
+                    circle_stroke_color = 'black'
+            else:
+                circle_stroke_color = section_head_text_color
+
             # Draw element
             draw_area.append(
                 draw_element(
@@ -411,7 +420,7 @@ def lay_out_body(
                     image=element_row['element_image'],
                     margin_dim=element_margin_dim,
                     circle_stroke_width=element_circle_stroke_width,
-                    circle_stroke_color=section_head_text_color[element_row['section']],
+                    circle_stroke_color=circle_stroke_color,
                     circle_padding_dim=element_circle_padding_dim
                 )
             )
