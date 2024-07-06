@@ -6,9 +6,11 @@
     Purpose
         Produce graphic
     Inputs
-        None
+        - img: <parliament_id>-<name>.<format>
+            - Portrait photos
+        - xlsm: 'MPs standing down GE24 main data.xlsm'
     Outputs
-        None
+        - svg: <graphic-filename>.svg
     Parameters
         - ifg_dark_grey: Colour used for text
         - dict_party_colours: Party colours
@@ -19,6 +21,10 @@
         further parameters
     Notes
         None
+    Bugs
+        - When switching from section_head_position='left' to section_head_position='top' and
+        vice versa, images are not displayed correctly. Clearing the VSCode interactive window
+        fixes this - there's no need to restart the kernel, so it's unclear why this happens
 """
 
 import os
