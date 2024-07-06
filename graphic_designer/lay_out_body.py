@@ -89,9 +89,11 @@ def lay_out_body(
     element_title_position: Literal['top', 'bottom'] = 'bottom',
     element_title_text_size: int = 10,
     element_title_text_weight: int = 400,
+    element_title_text_color: Union[str, dict] = 'black',
     element_title_text_style: str = None,
     element_subtitle_text_size: int = 8,
     element_subtitle_text_weight: int = 400,
+    element_subtitle_text_color: Union[str, dict] = 'black',
     element_subtitle_text_style: str = None,
     element_circle_stroke_width: int = 2,
     element_background_color: str = 'white',
@@ -132,9 +134,15 @@ def lay_out_body(
         - element_title_position: Position of element titles. Options are 'top' or 'bottom'
         - element_title_text_size: Font size of element titles
         - element_title_text_weight: Font weight of element titles
+        - element_title_text_color: Color of element titles. If a string, this color is
+        applied to all element titles. If a dictionary, each key should be a section name
+        and the corresponding value should be the color for that section
         - element_title_text_style: Font style of element titles
         - element_subtitle_text_size: Font size of element subtitles
         - element_subtitle_text_weight: Font weight of element subtitles
+        - element_subtitle_text_color: Color of element subtitles. If a string, this
+        color is applied to all element subtitles. If a dictionary, each key should be
+        a section name and the corresponding value should be the color for that section
         - element_subtitle_text_style: Font style of element subtitles
         - element_circle_stroke_width: Stroke width of circle
         - element_background_color: Background color of elements
@@ -320,6 +328,22 @@ def lay_out_body(
         else:
             text_color = section_head_text_color
 
+        if isinstance(element_title_text_color, dict):
+            if row['section'] in element_title_text_color:
+                title_text_color = element_title_text_color[row['section']]
+            else:
+                title_text_color = 'black'
+        else:
+            title_text_color = element_title_text_color
+
+        if isinstance(element_subtitle_text_color, dict):
+            if row['section'] in element_subtitle_text_color:
+                subtitle_text_color = element_subtitle_text_color[row['section']]
+            else:
+                subtitle_text_color = 'black'
+        else:
+            subtitle_text_color = element_subtitle_text_color
+
         if display_section_totals:
             section_head_text = f"{row['section']}: {row['elements']}"
         else:
@@ -374,13 +398,14 @@ def lay_out_body(
                     title=element_row['element_title'],
                     title_text_size=element_title_text_size,
                     title_text_weight=element_title_text_weight,
+                    title_text_color=title_text_color,
                     title_text_style=element_title_text_style,
                     subtitle=element_row['element_subtitle'],
                     subtitle_text_size=element_subtitle_text_size,
                     subtitle_text_weight=element_subtitle_text_weight,
+                    subtitle_text_color=subtitle_text_color,
                     subtitle_text_style=element_subtitle_text_style,
                     font_family=font,
-                    text_color='black',
                     title_position=element_title_position,
                     text_anchor='middle',
                     image=element_row['element_image'],

@@ -27,13 +27,14 @@ def draw_element(
     title: str,
     title_text_size: int,
     title_text_weight: int,
+    title_text_color: str,
     title_text_style: str,
     subtitle: str,
     subtitle_text_size: int,
     subtitle_text_weight: int,
+    subtitle_text_color: str,
     subtitle_text_style: str,
     font_family: str,
-    text_color: str,
     title_position: str,
     text_anchor: str,
     image: str,
@@ -54,13 +55,14 @@ def draw_element(
         - title: Title of element
         - title_text_size: Font size of title
         - title_text_weight: Font weight of title
+        - title_text_color: Text colour
         - title_text_style: Font style of title
         - subtitle: Subtitle of element
         - subtitle_text_size: Font size of subtitle
         - subtitle_text_weight: Font weight of subtitle
+        - subtitle_text_color: Text colour
         - subtitle_text_style: Font style of subtitle
         - font_family: Font family
-        - text_color: Text colour
         - title_position: Position of title
         - text_anchor: Text anchor
         - image: Image to be displayed in element
@@ -173,7 +175,7 @@ def draw_element(
             font_weight=title_text_weight,
             font_family=font_family,
             font_style=title_text_style,
-            fill=text_color,
+            fill=title_text_color,
             text_anchor=text_anchor,
             dominant_baseline=dominant_baseline,
         ),
@@ -189,7 +191,7 @@ def draw_element(
             font_weight=subtitle_text_weight,
             font_family=font_family,
             font_style=subtitle_text_style,
-            fill=text_color,
+            fill=subtitle_text_color,
             text_anchor=text_anchor,
             dominant_baseline=dominant_baseline,
         ),
