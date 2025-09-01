@@ -1,5 +1,4 @@
 # %%
-# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -29,7 +28,7 @@
 
 import os
 
-from IPython.display import display
+from IPython.display import display, SVG
 import pandas as pd
 
 from format_graphic_data import format_graphic_data
@@ -69,6 +68,13 @@ image_source = {
 # Graphic parameters
 elements_per_row = 5
 offset_rows = False
+
+graphic_filename = (
+    "C:/Users/" + os.getlogin() + "/"
+    "Institute for Government/Research - Data science/"
+    "Development/graphic-designer/"
+    "MPs standing down graphic - date announced"
+)
 
 # %%
 # READ IN DATA AND EDIT
@@ -194,7 +200,14 @@ body = lay_out_body(
     merge_sections=['Sinn Féin', 'Green', 'Plaid Cymru'],
 )
 
+# %%
 # DISPLAY GRAPHIC
-display(graphic)
+display(SVG(body))
+
+# %%
+# SAVE GRAPHIC
+# SVG
+with open(f"{graphic_filename}.svg", "w", encoding="utf-8") as f:
+    f.write(body)
 
 # %%
